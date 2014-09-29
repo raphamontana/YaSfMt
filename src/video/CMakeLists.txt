@@ -1,0 +1,1 @@
+set( VIDEO_SRC_LIST video/VideoStream.h video/CameraVideoStream.cpp video/CameraVideoStream.h video/FileVideoStream.cpp video/FileVideoStream.h video/ROSVideoStream.cpp video/ROSVideoStream.h video/Video.cpp video/Video.h PARENT_SCOPE )

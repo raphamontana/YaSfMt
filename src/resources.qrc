@@ -1,0 +1,17 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="about">rsc/icons/about.ico</file>
+        <file alias="camera">rsc/icons/camera.ico</file>
+        <file alias="exit">rsc/icons/exit.ico</file>
+        <file alias="fullscreen">rsc/icons/fullscreen.ico</file>
+        <file alias="help">rsc/icons/help.ico</file>
+        <file alias="new">rsc/icons/new.ico</file>
+        <file alias="open">rsc/icons/open.ico</file>
+        <file alias="resume">rsc/icons/resume.ico</file>
+        <file alias="ros">rsc/icons/ros.jpg</file>
+        <file alias="save">rsc/icons/save.ico</file>
+        <file alias="settings">rsc/icons/settings.ico</file>
+        <file alias="video">rsc/icons/video.ico</file>
+    </qresource>
+</RCC>
