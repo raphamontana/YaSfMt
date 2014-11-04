@@ -34,13 +34,16 @@ MainWindow::MainWindow( bool *ready, condition_variable *cv, mutex *m , atomic<b
     this->signalReady = signalReady;
 }
 
+
 MainWindow::~MainWindow()
 {
     sendSignal( SignalType::QUIT );
     qApp->quit();
 }
 
-void MainWindow::setupUi() {
+
+void MainWindow::setupUi()
+{
     centralWidget = new QWidget();
     layout = new QGridLayout( centralWidget );
 
@@ -49,39 +52,57 @@ void MainWindow::setupUi() {
     pointCloudViewLabel = new QLabel( tr("Point cloud view" ) );
     statusLabel = new QLabel( tr( "Status: Not started." ) );
 
-    cameraView = new CVWidget();
-    latestFrameView = new CVWidget();
-    pointCloudView = new CVWidget();
-    cameraView->setToolTip( tr( "Video input" ) );
-    latestFrameView->setToolTip( tr( "Last frame successfully merged into the map (with matched features)" ) );
-    pointCloudView->setToolTip( tr( "Real-time visualization of the map being built" ) );
-
-    cameraView->setMinimumSize( 320, 240 );
-    latestFrameView->setMinimumSize( 320,240 );
-    pointCloudView->setMinimumSize( 680, 510 );
-
-    QSizePolicy sizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
-    //layout->setSizePolicy( sizePolicy );
-    cameraView->setSizePolicy( sizePolicy );
-    latestFrameView->setSizePolicy( sizePolicy );
-    pointCloudView->setSizePolicy( sizePolicy );
-
-    layout->addWidget( cameraView, 3, 1, Qt::AlignTop );
     layout->addWidget( cameraViewLabel, 2, 1, Qt::AlignBottom );
+    layout->addWidget( latestFrameViewLabel, 0, 1, Qt::AlignBottom );
     layout->addWidget( pointCloudViewLabel, 0, 0, Qt::AlignBottom );
     layout->addWidget( statusLabel, 4, 0, 1, 2, Qt::AlignBottom );
-    layout->addWidget( latestFrameViewLabel, 0, 1, Qt::AlignBottom );
-    layout->addWidget( latestFrameView, 1, 1, Qt::AlignTop );
-    layout->addWidget( pointCloudView, 1, 0, 3, 1, Qt::AlignTop );
+
+    setupCameraView();
+    setupLatestFrameView();
+    setupPointCloudView();
 
     setCentralWidget( centralWidget );
 
+}
+
+
+void MainWindow::setupCameraView()
+{
+    cameraView = new CVWidget();
+    cameraView->setToolTip( tr( "Video input" ) );
+    cameraView->setMinimumSize( 320, 240 );
+    cameraView->resize( 320, 240 );
+    cameraView->sizePolicy().setHeightForWidth( true );
+    layout->addWidget( cameraView, 3, 1, Qt::AlignTop );
     connect( cameraView, SIGNAL( doubleClicked( QWidget* ) ), this, SLOT( showFullScreen( QWidget* ) ) );
+}
+
+
+void MainWindow::setupLatestFrameView()
+{
+    latestFrameView = new CVWidget();
+    latestFrameView->setToolTip( tr( "Last frame successfully merged into the map (with matched features)" ) );
+    latestFrameView->setMinimumSize( 320,240 );
+    latestFrameView->resize( 320,240 );
+    latestFrameView->sizePolicy().setHeightForWidth( true );
+    layout->addWidget( latestFrameView, 1, 1, Qt::AlignTop );
     connect( latestFrameView, SIGNAL( doubleClicked( QWidget* ) ), this, SLOT( showFullScreen( QWidget* ) ) );
+}
+
+
+void MainWindow::setupPointCloudView()
+{
+    pointCloudView = new CVWidget();
+    pointCloudView->setToolTip( tr( "Real-time visualization of the map being built" ) );
+    pointCloudView->setMinimumSize( 680, 510 );
+    pointCloudView->sizePolicy().setHeightForWidth( true );
+    layout->addWidget( pointCloudView, 1, 0, 3, 1, Qt::AlignTop );
     connect( pointCloudView, SIGNAL( doubleClicked( QWidget* ) ), this, SLOT( showFullScreen( QWidget* ) ) );
 }
 
-void MainWindow::createActions() {
+
+void MainWindow::createActions()
+{
     newPointCloudAction = new QAction( QIcon(":/icons/new.ico" ), tr( "&New point cloud" ), this );
     newPointCloudAction->setShortcuts( QKeySequence::New );
     newPointCloudAction->setStatusTip( tr( "New point cloud." ) );
@@ -145,7 +166,9 @@ void MainWindow::createActions() {
     connect( aboutAction, SIGNAL( triggered() ), this, SLOT( about() ) );
 }
 
-void MainWindow::createMenus() {
+
+void MainWindow::createMenus()
+{
     fileMenu = menuBar()->addMenu( tr( "&File" ) );
     fileMenu->addAction( newPointCloudAction );
     fileMenu->addAction( openPointCloudAction );
@@ -172,29 +195,41 @@ void MainWindow::createMenus() {
     helpMenu->addAction( aboutAction );
 }
 
-void MainWindow::createStatusBar() {
+
+void MainWindow::createStatusBar()
+{
     statusBar()->showMessage( tr( "Ready." ) );
 }
 
-void MainWindow::updateCameraView( Mat camera ) {
+
+void MainWindow::updateCameraView( Mat camera )
+{
     cameraView->setImage( camera );
 }
 
-void MainWindow::updatePointCloudView( Mat camera ) {
+
+void MainWindow::updatePointCloudView( Mat camera )
+{
     pointCloudView->setImage( camera );
 }
 
-void MainWindow::updateLatestFrameView( Mat latestFrame ) {
+
+void MainWindow::updateLatestFrameView( Mat latestFrame )
+{
     documentWasModified.store( true );
     latestFrameView->setImage( latestFrame );
 }
 
-string MainWindow::getFilename() {
+
+string MainWindow::getFilename()
+{
     lock_guard<mutex> lk( fileNameMutex );
     return( fileName );
 }
 
-void MainWindow::captureFailed() {
+
+void MainWindow::captureFailed()
+{
     captureFromCameraAction->setEnabled( true );
     captureFromROSNodeAction->setEnabled( true );
     captureFromVideoFileAction->setEnabled( true );
@@ -202,26 +237,38 @@ void MainWindow::captureFailed() {
     savePointCloudAction->setEnabled( false );
 }
 
-InputSource MainWindow::getInputSource() {
+
+InputSource MainWindow::getInputSource()
+{
     lock_guard<mutex> lk( inputSourceMutex );
     return( inputSource );
 }
 
-SignalType MainWindow::getSignal() {
+
+SignalType MainWindow::getSignal()
+{
     lock_guard<mutex> lk( signalMutex );
     return( signal );
 }
 
-void MainWindow::setStatusMessage( string message ) {
+
+void MainWindow::setStatusMessage( string message )
+{
     string msg = "Status: " + message;
     statusLabel->setText( tr( msg.c_str() ) );
 }
 
-void MainWindow::incrementFramesCounter() {
-    latestFrameViewLabel->setText( QString( "Latest frame: " + QString::number( ++framesCounter ) ) );
+
+void MainWindow::incrementFramesCounter()
+{
+    if ( latestFrameViewLabel != NULL ) {
+        latestFrameViewLabel->setText( QString( "Latest frame: " + QString::number( ++framesCounter ) ) );
+    }
 }
 
-void MainWindow::sendSignal( SignalType s ) {
+
+void MainWindow::sendSignal( SignalType s )
+{
     {
         lock_guard<mutex> lk( *m );
         *ready = true;
@@ -234,11 +281,15 @@ void MainWindow::sendSignal( SignalType s ) {
     cv->notify_one();
 }
 
-void MainWindow::calibrateCamera() {
+
+void MainWindow::calibrateCamera()
+{
     sendSignal( SignalType::CALIBRATE );
 }
 
-void MainWindow::captureFromCamera() {
+
+void MainWindow::captureFromCamera()
+{
     calibrateCameraAction->setEnabled( false );
     captureFromCameraAction->setEnabled( false );
     captureFromROSNodeAction->setEnabled( false );
@@ -252,7 +303,9 @@ void MainWindow::captureFromCamera() {
     sendSignal( SignalType::CAPTURE );
 }
 
-void MainWindow::captureFromROSNode() {
+
+void MainWindow::captureFromROSNode()
+{
     calibrateCameraAction->setEnabled( false );
     captureFromCameraAction->setEnabled( false );
     captureFromROSNodeAction->setEnabled( false );
@@ -266,7 +319,9 @@ void MainWindow::captureFromROSNode() {
     sendSignal( SignalType::CAPTURE );
 }
 
-void MainWindow::captureFromVideoFile() {
+
+void MainWindow::captureFromVideoFile()
+{
     calibrateCameraAction->setEnabled( false );
     captureFromCameraAction->setEnabled( false );
     captureFromROSNodeAction->setEnabled( false );
@@ -285,7 +340,9 @@ void MainWindow::captureFromVideoFile() {
     sendSignal( SignalType::CAPTURE );
 }
 
-void MainWindow::pauseCapture() {
+
+void MainWindow::pauseCapture()
+{
     if ( !paused ) {
         paused = true;
         pauseCaptureAction->setText( tr( "&Resume" ) );
@@ -298,7 +355,9 @@ void MainWindow::pauseCapture() {
     }
 }
 
-void MainWindow::newPointCloud() {
+
+void MainWindow::newPointCloud()
+{
     captureFromCameraAction->setEnabled( true );
     captureFromROSNodeAction->setEnabled( true );
     captureFromVideoFileAction->setEnabled( true );
@@ -306,7 +365,9 @@ void MainWindow::newPointCloud() {
     sendSignal( SignalType::NEW );
 }
 
-bool MainWindow::openPointCloud() {
+
+bool MainWindow::openPointCloud()
+{
     {
         lock_guard<mutex> lk( fileNameMutex );
         fileName = QFileDialog::getOpenFileName( this, tr( "Open point cloud" ),
@@ -321,7 +382,9 @@ bool MainWindow::openPointCloud() {
     }
 }
 
-bool MainWindow::savePointCloud() {
+
+bool MainWindow::savePointCloud()
+{
     {
         lock_guard<mutex> lk( fileNameMutex );
         fileName = QFileDialog::getSaveFileName( this, tr( "Save point cloud" ),
@@ -336,7 +399,9 @@ bool MainWindow::savePointCloud() {
     }
 }
 
-void MainWindow::close() {
+
+void MainWindow::close()
+{
     if ( documentWasModified.load() ) {
         bool readyToClose = false;
         while ( !readyToClose ) {
@@ -367,14 +432,9 @@ void MainWindow::close() {
     }
 }
 
-void MainWindow::showFullScreen() {
-    cameraView->setVisible( true );
-    cameraViewLabel->setVisible( true );
-    latestFrameView->setVisible( true );
-    latestFrameViewLabel->setVisible( true );
-    pointCloudView->setVisible( true );
-    pointCloudViewLabel->setVisible( true );
-    statusLabel->setVisible( true );
+
+void MainWindow::showFullScreen()
+{
     if ( isFullScreen() ) {
         QMainWindow::showNormal();
     }
@@ -383,40 +443,32 @@ void MainWindow::showFullScreen() {
     }
 }
 
-void MainWindow::showFullScreen( QWidget *widget ) {
-    showFullScreen();
-    if ( isFullScreen() ) {
-        if ( widget == cameraView ) {
-            //cameraView->setFixedSize( 640, 480 );
 
-            cameraView->setVisible( isFullScreen() );
-            cameraViewLabel->setVisible( isFullScreen() );
-            latestFrameView->setVisible( !isFullScreen() );
-            latestFrameViewLabel->setVisible( !isFullScreen() );
-            pointCloudView->setVisible( !isFullScreen() );
-            pointCloudViewLabel->setVisible( !isFullScreen() );
-            statusLabel->setVisible( isFullScreen() );
-        } else if ( widget == latestFrameView ) {
-            cameraView->setVisible( !isFullScreen() );
-            cameraViewLabel->setVisible( !isFullScreen() );
-            latestFrameView->setVisible( isFullScreen() );
-            latestFrameViewLabel->setVisible( isFullScreen() );
-            pointCloudView->setVisible( !isFullScreen() );
-            pointCloudViewLabel->setVisible( !isFullScreen() );
-            statusLabel->setVisible( isFullScreen() );
-        } else {
-            cameraView->setVisible( !isFullScreen() );
-            cameraViewLabel->setVisible( !isFullScreen() );
-            latestFrameView->setVisible( !isFullScreen() );
-            latestFrameViewLabel->setVisible( !isFullScreen() );
-            pointCloudView->setVisible( isFullScreen() );
-            pointCloudViewLabel->setVisible( isFullScreen() );
-            statusLabel->setVisible( isFullScreen() );
+void MainWindow::showFullScreen( QWidget *widget )
+{
+    showFullScreen();
+
+    if ( QMainWindow::centralWidget() != widget ) {
+        centralWidget->setParent( 0 ); // Preserve current central widget
+        setCentralWidget( widget );
+    }
+    else {
+        if ( widget == cameraView ) {
+            setupCameraView();
         }
+        else if ( widget == latestFrameView ) {
+            setupLatestFrameView();
+        }
+        else if ( widget == pointCloudView ) {
+            setupPointCloudView();
+        }
+        setCentralWidget( centralWidget );
     }
 }
 
-void MainWindow::contents() {
+
+void MainWindow::contents()
+{
     QDesktopServices::openUrl( QUrl( "http://lar.icmc.usp.br/" ) );
 
 	//pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
@@ -427,7 +479,9 @@ void MainWindow::contents() {
     //}
 }
 
-void MainWindow::about() {
+
+void MainWindow::about()
+{
     QMessageBox::about( this, tr( "About YaSfMt" ),
              tr( "The <b>Yet another Structure from Motion toolkit</b> is an application that demonstrates how to generate a point cloud using structure from motion techniques." ) );
 }

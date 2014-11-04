@@ -133,6 +133,9 @@ private:
     void createMenus();
     void createStatusBar();
     void setupUi();
+    void setupCameraView();
+    void setupLatestFrameView();
+    void setupPointCloudView();
     void sendSignal( SignalType s );
 
     QWidget *centralWidget;

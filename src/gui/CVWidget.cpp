@@ -82,3 +82,13 @@ void CVWidget::mouseDoubleClickEvent( QMouseEvent * event )
     emit( doubleClicked( this ) );
     QGLWidget::mouseDoubleClickEvent( event );
 }
+
+//int CVWidget::heightForWidth( int width ) const
+//{
+//    return( 3 * width / 4 );
+//}
+
+QSize CVWidget::sizeHint() const
+{
+    return( QSize( width(), 3 * width() / 4 ) );
+}

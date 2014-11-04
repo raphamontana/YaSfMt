@@ -1,9 +1,13 @@
-cmake_minimum_required( VERSION 2.8 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 
+# ======================================================
 # Project YetAnotherStructureFromMotionToolkit
+# ======================================================
 project( YaSfMt )
 
+# ======================================================
 # Add sources directory
+# ======================================================
 add_subdirectory( core )
 add_subdirectory( gui )
 add_subdirectory( pcnn )
@@ -13,48 +17,67 @@ add_subdirectory( vision )
 
 set( SRC_LIST main.cpp ${CORE_SRC_LIST} ${GUI_SRC_LIST} ${PCNN_SRC_LIST} ${UTILS_SRC_LIST} ${VIDEO_SRC_LIST} ${VISION_SRC_LIST} )
 
-set( YASFMT_VERSION_MAJOR 1 )
-set( YASFMT_VERSION_MINOR 0 )
+# ======================================================
+#  Version variables:
+# ======================================================
+set( YASFMT_VERSION_MAJOR 0 )
+set( YASFMT_VERSION_MINOR 1 )
+set( YASFMT_VERSION_REVISION 1 )
 set( CMAKE_BUILD_TYPE DEBUG )
 set( CMAKE_INCLUDE_CURRENT_DIR ON )    # Find includes in corresponding build directories
 set( CMAKE_AUTOMOC ON )                # Instruct CMake to run moc automatically when needed.
 
-#set( CMAKE_PREFIX_PATH "/opt/Qt5.0.2/5.0.2/gcc_64/" )
+# ======================================================
+# Use the package PkgConfig to detect headers/library files
+# ======================================================
+find_package( PkgConfig REQUIRED )
 
+# ======================================================
 # Add Qt 5 library
-find_package( Qt5 COMPONENTS Widgets REQUIRED )
-#set( QT_USE_QTOPENGL TRUE )
-#include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
-#link_directories( ${Qt5Widgets_LIBRARIES} )
+# ======================================================
+find_package( Qt5Widgets REQUIRED )
+find_package( Qt5OpenGL REQUIRED )
 qt5_add_resources( RSC_LIST resources.qrc )
+set( QT_USE_QTOPENGL TRUE )
+set( LIBRARIES ${LIBRARIES} Qt5::Widgets Qt5::OpenGL )
 
+# ======================================================
 # Add OpenGL library
+# ======================================================
 find_package( OpenGL REQUIRED )
-#include_directories( ${OPENGL_INCLUDE_DIR} )
-#link_directories( ${OPENGL_LIBRARIES} )
+set( LIBRARIES ${LIBRARIES} ${OPENGL_LIBRARIES} )
 
-# Add OpenCV 2.4.4 library
-find_package( OpenCV 2.4.4 REQUIRED )
+# ======================================================
+# Add OpenCV library
+# ======================================================
+find_package( OpenCV 2.4 REQUIRED )
+set( LIBRARIES ${LIBRARIES} ${OpenCV_LIBS} opencv_nonfree opencv_viz )
 
-find_package( VTK REQUIRED )
+# ======================================================
+# Add VTK library
+# ======================================================
+find_package( VTK 5.8 REQUIRED NO_MODULE )
 include( ${VTK_USE_FILE} )
-set( VTK_LIBRARIES vtkRendering vtkGraphics vtkHybrid QVTK )
+set( LIBRARIES ${LIBRARIES} ${VTK_LIBRARIES} QVTK )
 
+# ======================================================
 # Add PCL library
+# ======================================================
 find_package( PCL 1.7.1 REQUIRED )
-include_directories( ${PCL_INCLUDE_DIRS} )
-link_directories( ${PCL_LIBRARY_DIRS} )
-add_definitions( ${PCL_DEFINITIONS} )
+set( LIBRARIES ${LIBRARIES} ${PCL_LIBRARIES} )
 
-#set( CMAKE_CXX_COMPILER "g++-4.8" )
+# ======================================================
+# Compiler flags
+# ======================================================
+add_definitions( -ansi -std=c++11 -Wall -Wextra )
 
-set( CMAKE_CXX_FLAGS "-Wextra -Wall -ansi -std=c++11" )
-#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}" )
-#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L/usr/lib/x86_64-linux-gnu/mesa -lGL -lGLU" )
-
-# Tell CMake to create the YaSfMt executable
+# ======================================================
+# Create the YaSfMt executable
+# ======================================================
 add_executable( ${PROJECT_NAME} ${SRC_LIST} ${RSC_LIST} )
-target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${QT_LIBRARIES} ${PCL_LIBRARIES} ${VTK_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} ${LIBRARIES} )
 
-qt5_use_modules( ${PROJECT_NAME} Widgets )
-qt5_use_modules( ${PROJECT_NAME} OpenGL )
+# ======================================================
+# Unnecessary libs
+# ======================================================
+#set( LIBRARIES ${LIBRARIES} Xext X11 ICE SM GL GLU tbb rt pthread m dl )

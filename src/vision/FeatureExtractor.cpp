@@ -8,7 +8,8 @@
 #include "FeatureExtractor.h"
 
 FeatureExtractor::FeatureExtractor() {
-	initModule_nonfree();
+    /// ToDo
+    //initModule_nonfree();
 
 	// Inicializa o extrator SIFT.
 	sift = Algorithm::create<Feature2D>("Feature2D.SIFT");

@@ -11,7 +11,14 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/nonfree/nonfree.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+
+//#ifdef HAVE_OPENCV_NONFREE
+#include "opencv2/nonfree/nonfree.hpp"
+static bool makeUseOfNonfree = cv::initModule_nonfree();
+//#else
+//#  error No SIFT.
+//#endif
 
 using namespace cv;
 

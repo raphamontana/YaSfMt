@@ -11,9 +11,11 @@
 #define CVWIDGET_H
 
 #include <mutex>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/freeglut.h>
 #include <QGLWidget>
 #include <QtOpenGL>
-#include <GL/glu.h>
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -46,6 +48,10 @@ protected:
 private:
 
     void mouseDoubleClickEvent( QMouseEvent * event );
+
+    //int heightForWidth( int ) const;
+
+    QSize sizeHint() const;
 
     mutex m;
     QImage qframe;

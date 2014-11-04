@@ -114,19 +114,22 @@ void Video::stop()
         } catch ( const exception &e ) {
             cerr << "An exception occurred. Exception Nr.: " << e.what() << endl;
         }
-        CameraVideoStream* cvs = (CameraVideoStream*) videoStream;
+        CameraVideoStream * cvs = (CameraVideoStream*) videoStream;
+        FileVideoStream * fvs = (FileVideoStream*) videoStream;
+        ROSVideoStream * rvs = (ROSVideoStream*) videoStream;
         switch ( source ) {
             case InputSource::CAMERA:
                 delete( cvs );
                 break;
             case InputSource::FILE:
+                delete( fvs );
                 break;
             case InputSource::ROS:
+                delete( rvs );
                 break;
             default:
                 break;
         }
-        delete( videoStream ); /// FIXME Destrutor virtual.
     }
 }
 
