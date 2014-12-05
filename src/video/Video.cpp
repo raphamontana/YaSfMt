@@ -16,10 +16,12 @@ Video::Video( Gui *gui )
     ready = false;
 }
 
+
 bool Video::isRunning()
 {
     return( t.joinable() );
 }
+
 
 bool Video::captureFrom( InputSource source, string sourceName, string *message )
 {
@@ -73,6 +75,7 @@ bool Video::captureFrom( InputSource source, string sourceName, string *message 
     return( true );
 }
 
+
 void Video::run()
 {
     Mat newFrame;
@@ -97,6 +100,7 @@ void Video::run()
         }
     }
 }
+
 
 void Video::stop()
 {
@@ -133,12 +137,19 @@ void Video::stop()
     }
 }
 
+
 long long int Video::getFrame( Mat *image )
 {
     lock_guard<mutex> lock( frameMutex );
-    *image = frame.clone();
-    return( frameNumber );
+    if ( isValidFrame( frame ) ) {
+        *image = frame.clone();
+        return( frameNumber );
+    }
+    else {
+        return( -1 );
+    }
 }
+
 
 bool Video::isValidFrame( Mat image ) {
     return( image.data && image.cols > 0 && image.rows > 0 && !image.empty() );

@@ -50,21 +50,21 @@ set( LIBRARIES ${LIBRARIES} ${OPENGL_LIBRARIES} )
 # ======================================================
 # Add OpenCV library
 # ======================================================
-find_package( OpenCV 2.4 REQUIRED )
-set( LIBRARIES ${LIBRARIES} ${OpenCV_LIBS} opencv_nonfree opencv_viz )
+find_package( OpenCV 3 REQUIRED )
+set( LIBRARIES ${LIBRARIES} ${OpenCV_LIBS} opencv_viz ) #opencv_nonfree
 
 # ======================================================
 # Add VTK library
 # ======================================================
-find_package( VTK 5.8 REQUIRED NO_MODULE )
+find_package( VTK 6.1 REQUIRED NO_MODULE )
 include( ${VTK_USE_FILE} )
-set( LIBRARIES ${LIBRARIES} ${VTK_LIBRARIES} QVTK )
+set( LIBRARIES ${LIBRARIES} ${VTK_LIBRARIES} ) #QVTK
 
 # ======================================================
 # Add PCL library
 # ======================================================
-find_package( PCL 1.7.1 REQUIRED )
-set( LIBRARIES ${LIBRARIES} ${PCL_LIBRARIES} )
+#find_package( PCL 1.8 REQUIRED )
+#set( LIBRARIES ${LIBRARIES} ${PCL_LIBRARIES} )
 
 # ======================================================
 # Compiler flags
@@ -76,8 +76,3 @@ add_definitions( -ansi -std=c++11 -Wall -Wextra )
 # ======================================================
 add_executable( ${PROJECT_NAME} ${SRC_LIST} ${RSC_LIST} )
 target_link_libraries( ${PROJECT_NAME} ${LIBRARIES} )
-
-# ======================================================
-# Unnecessary libs
-# ======================================================
-#set( LIBRARIES ${LIBRARIES} Xext X11 ICE SM GL GLU tbb rt pthread m dl )

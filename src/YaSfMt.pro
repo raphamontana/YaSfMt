@@ -1,10 +1,3 @@
-QT       += core gui opengl
-
-greaterThan( QT_MAJOR_VERSION, 4 ) : QT += widgets
-
-TARGET    = YaSfMt
-TEMPLATE  = app
-
 SOURCES += main.cpp \
         core/Core.cpp \
         gui/CVWidget.cpp \
@@ -22,8 +15,11 @@ SOURCES += main.cpp \
         vision/FeatureExtractor.cpp \
         vision/FeatureMatcher.cpp \
         vision/FundamentalMatrix.cpp \
+        vision/MotionDetector.cpp \
+	vision/RobustMatcher.cpp \
         vision/Vision.cpp \
         vision/Triangulation.cpp
+
 
 HEADERS += core/Core.h \
         gui/CVWidget.h \
@@ -45,9 +41,18 @@ HEADERS += core/Core.h \
         vision/FeatureExtractor.h \
         vision/FeatureMatcher.h \
         vision/FundamentalMatrix.h \
+        vision/MotionDetector.h \
+	vision/RobustMatcher.h \
         vision/Vision.h \
-        vision/Triangulation.h
+        vision/Triangulation.h \
+    utils/SfMStatus.h
 
 RESOURCES   += resources.qrc
 
-OTHER_FILES += CMakeLists.txt
+OTHER_FILES += CMakeLists.txt \
+        core/CMakeLists.txt \
+        gui/CMakeLists.txt \
+        pcnn/CMakeLists.txt \
+        utils/CMakeLists.txt \
+        video/CMakeLists.txt \
+        vision/CMakeLists.txt

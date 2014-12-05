@@ -15,10 +15,12 @@ Gui::Gui()
     ready = false;
 }
 
+
 bool Gui::isRunning()
 {
     return( t.joinable() );
 }
+
 
 void Gui::start()
 {
@@ -27,6 +29,7 @@ void Gui::start()
     }
     t = thread( &Gui::run, this );
 }
+
 
 void Gui::run()
 {
@@ -43,6 +46,7 @@ void Gui::run()
     delete( mainWindow );
 }
 
+
 void Gui::stop()
 {
     if ( isRunning() ) {
@@ -54,6 +58,7 @@ void Gui::stop()
     }
 }
 
+
 void Gui::waitSignal()
 {
     {
@@ -64,6 +69,7 @@ void Gui::waitSignal()
     readySignal.store( false );
 }
 
+
 bool Gui::gotSignal()
 {
     if ( readySignal.load() ) {
@@ -73,45 +79,54 @@ bool Gui::gotSignal()
     return( false );
 }
 
+
 SignalType Gui::getSignal()
 {
     return( mainWindow->getSignal() );
 }
+
 
 void Gui::captureFailed()
 {
     mainWindow->captureFailed();
 }
 
+
 InputSource Gui::getInputSource()
 {
     return( mainWindow->getInputSource() );
 }
+
 
 string Gui::getFilename()
 {
     return( mainWindow->getFilename() );
 }
 
+
 void Gui::setStatusMessage( string message )
 {
     mainWindow->setStatusMessage( message );
 }
+
 
 void Gui::incrementFramesCounter()
 {
     mainWindow->incrementFramesCounter();
 }
 
+
 void Gui::setCameraView( Mat frame )
 {
     mainWindow->updateCameraView( frame );
 }
 
+
 void Gui::setLatestFrameView( Mat frame )
 {
     mainWindow->updateLatestFrameView( frame );
 }
+
 
 void Gui::setPointCloudView( Mat frame )
 {

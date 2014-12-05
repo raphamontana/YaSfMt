@@ -72,11 +72,6 @@ public:
     long long int getFrame( Mat *image );
 
     /**
-     * \return True if the image is valid. False otherwise.
-     */
-    bool isValidFrame( Mat image );
-
-    /**
      * \brief Set the input source of the video.
      * \arg source The input source.
      * \arg sourceName The path to the input.
@@ -85,6 +80,11 @@ public:
     bool captureFrom( InputSource source, string sourceName, string *message );
 
 private:
+
+    /**
+     * \return True if the image is valid. False otherwise.
+     */
+    bool isValidFrame( Mat image );
 
     bool ready;
     condition_variable cv;

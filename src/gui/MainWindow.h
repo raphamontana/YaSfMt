@@ -11,9 +11,11 @@
 #define MAIN_WINDOW_H
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <exception>
 #include <mutex>
+#include <thread>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QGridLayout>

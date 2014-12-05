@@ -2,27 +2,56 @@
 
 Vision::Vision()
 {
+    firstFrame = true;
     cameraCalibration = new CameraCalibration();
     cameraCalibration->readCameraInfo();
 }
+
 
 Vision::~Vision()
 {
     delete( cameraCalibration );
 }
 
-void Vision::setInitialFrame( Mat frame )
+
+bool Vision::isFirstFrame()
 {
-    cvtColor( frame, lastFrame, CV_RGB2GRAY );
+    return( firstFrame );
+}
+
+
+void Vision::setFirstFrame( bool first )
+{
+    firstFrame = first;
+}
+
+
+void Vision::setLastFrame( Mat frame )
+{
+    cvtColor( frame, lastFrame, COLOR_RGB2GRAY );
     featureExtractor.extractORB( lastFrame, &lastFrameDescriptors, &lastFrameKeypoints );
     lastFrameDescriptors.convertTo( lastFrameDescriptors, CV_32F );
 }
+
+
+SfMStatus Vision::detectMotion( Mat &frame )
+{
+    if ( !isFirstFrame() ) {
+        return( motionDetector.detect( lastFrame, frame ) ? SfMStatus::MAPPING : SfMStatus::NOT_ENOUGH_MOTION );
+    }
+    else {
+        setLastFrame( frame );
+        setFirstFrame( false );
+        return( SfMStatus::INITIATING );
+    }
+}
+
 
 int Vision::getMotionMap( Mat &frame )
 {
     Mat currentFrame;
 
-    cvtColor( frame, currentFrame, CV_RGB2GRAY );
+    cvtColor( frame, currentFrame, COLOR_RGB2GRAY );
     featureExtractor.extractORB( currentFrame, &currentFrameDescriptors, &currentFrameKeypoints );
     // Convert the descriptors to the FLANN matcher format.
     currentFrameDescriptors.convertTo( currentFrameDescriptors, CV_32F );
@@ -74,7 +103,7 @@ void Vision::estimateMotion()
     Mat fundamental = findFundamentalMat(
         Mat( selPointsLeft ),  // points in first image
         Mat( selPointsRight ), // points in second image
-        CV_FM_8POINT );        // 8-point method
+        FM_8POINT );        // 8-point method
 #ifdef _DEBUG
     cout << "Fundamental matrix" << endl << fundamental << endl;
 #endif
@@ -172,4 +201,48 @@ void Vision::reconstructionTriangulation()
 void Vision::calibrateCamera()
 {
     cameraCalibration->calibrate();
+}
+
+
+SfMStatus Vision::processStructureFromMotion( Mat &frame )
+{
+    // Processing()
+    // -> Calibrate camera
+    // -> Extrai características locais.
+    // -> Faz correspondência entre os pontos.
+    // -> Find fundamental matrix based on undistorted feature points.
+    // -> Get essential matrix from fundamental matrix.
+    // -> Compute projection matrix from cam1 to cam2
+    // -> Triangulate
+    // -> Calcula posição da câmera e dos pontos.
+    // ---> Algoritmo dos 8 pontos.
+    // ---> Matriz F.
+    // ---> cv::LevMarqSparse lms;
+    // ---> Triangulação
+
+    int matches = 0;
+    bool triangulou = false;
+    switch ( detectMotion( frame ) ) {
+        case SfMStatus::MAPPING: // Moviment detected.
+            // Roda uma iteraçao do algoritmo
+            matches = getMotionMap( frame );
+            if ( matches >= 8 ) {
+                estimateMotion();
+                reconstructionTriangulation();
+                triangulou = true;
+            }
+            if ( triangulou ) {
+                setLastFrame( frame );
+                return( SfMStatus::MAPPING );
+            }
+            else {
+                return( SfMStatus::LOST_TRACKING );
+            }
+        case SfMStatus::NOT_ENOUGH_MOTION:
+            return( SfMStatus::NOT_ENOUGH_MOTION );
+        case SfMStatus::INITIATING:
+            return( SfMStatus::INITIATING );
+        default:
+            return( SfMStatus::ERROR );
+    }
 }

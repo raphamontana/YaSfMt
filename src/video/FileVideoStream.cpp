@@ -13,8 +13,8 @@ FileVideoStream::FileVideoStream( string fileName )
 {
     cap = VideoCapture();
     cap.open( fileName );
-    cap.set( CV_CAP_PROP_POS_AVI_RATIO, 1 );
-    numberOfFrames = cap.get( CV_CAP_PROP_POS_FRAMES );
+    cap.set( CAP_PROP_POS_AVI_RATIO, 1 );
+    numberOfFrames = cap.get( CAP_PROP_POS_FRAMES );
 }
 
 FileVideoStream::~FileVideoStream() {
@@ -30,13 +30,13 @@ Mat FileVideoStream::getFrame() {
     cap >> frame;
     if ( frame.empty() ) {
         // Rewind video.
-        cap.set( CV_CAP_PROP_POS_FRAMES, 0 );
+        cap.set( CAP_PROP_POS_FRAMES, 0 );
     }
     return frame;
 }
 
 int FileVideoStream::getFPS() {
-    return ( cap.get( CV_CAP_PROP_FPS ) );
+    return ( cap.get( CAP_PROP_FPS ) );
 }
 
 void FileVideoStream::close() {

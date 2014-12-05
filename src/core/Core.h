@@ -75,8 +75,6 @@ private:
     void halt();
 
     Gui gui;
-    long long int currentFrame;
-    bool firstFrame;
     SystemStatus systemStatus;
     Video video;
     Vision vision;

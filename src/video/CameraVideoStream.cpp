@@ -36,7 +36,7 @@ Mat CameraVideoStream::getFrame() {
 }
 
 int CameraVideoStream::getFPS() {
-    return( cap.get( CV_CAP_PROP_FPS ) );
+    return( cap.get( CAP_PROP_FPS ) );
 }
 
 bool CameraVideoStream::isOpened() {

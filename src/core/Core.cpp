@@ -11,10 +11,9 @@
 
 Core::Core() : video( &gui )
 {
-    currentFrame = 0;
     systemStatus = SystemStatus::INITIATING;
-    firstFrame = true;
 }
+
 
 void Core::exec()
 {
@@ -44,17 +43,20 @@ void Core::exec()
     }
 }
 
+
 void Core::init()
 {
     gui.start();
     systemStatus = SystemStatus::FETCHING;
 }
 
+
 void Core::fetch()
 {
     gui.waitSignal();
     systemStatus = SystemStatus::DECODING;
 }
+
 
 void Core::decode()
 {
@@ -105,66 +107,46 @@ void Core::decode()
     }
 }
 
+
+void Core::halt()
+{
+    video.stop();
+    gui.stop();
+}
+
+
 void Core::execute()
 {
-    long long int newFrameNumber;
-    Mat frame;
-
     // Acquisition()
     // -> Captura imagens.
-    newFrameNumber = video.getFrame( &frame );
+    Mat frame;
+    video.getFrame( &frame );
 
-    // Processing()
-    // -> Calibrate camera
-    // -> Extrai caracteristicas locais.
-    // -> Faz correspondencia entre os pontos.
-    // -> Find fundamental matrix based on undistorted feature points.
-    // -> Get essential matrix from fundamental matrix.
-    // -> Compute projection matrix from cam1 to cam2
-    // -> Triangulate
-    // -> Calcula posicao da camera e dos pontos.
-    // ---> Algoritmo dos 8 pontos.
-    // ---> Matriz F.
-    // ---> cv::LevMarqSparse lms;
-    // ---> Triangulação
-    if ( ( currentFrame != newFrameNumber ) && ( video.isValidFrame( frame ) ) ) {
-        currentFrame = newFrameNumber;
-        gui.incrementFramesCounter();
-
-        if ( !firstFrame ) {
-            // Roda uma iteraçao do algoritmo
-            int matches = vision.getMotionMap( frame );
-            if ( matches >= 8 ) {
-                vision.estimateMotion();
-                vision.reconstructionTriangulation();
-            }
-            else {
-                gui.setStatusMessage( "Lost tracking. Try to match against last frame." );
-            }
-            //systemStatus = SystemStatus::HALTED;
-        }
-        else {
-            vision.setInitialFrame( frame );
-            firstFrame = false;
-        }
+    switch ( vision.processStructureFromMotion( frame ) ) {
+        case SfMStatus::INITIATING:
+            gui.incrementFramesCounter();
+            gui.setLatestFrameView( frame );
+            gui.setStatusMessage( "First frame set." );
+            break;
+        case SfMStatus::MAPPING:
+            gui.incrementFramesCounter();
+            gui.setLatestFrameView( frame );
+            gui.setStatusMessage( "Mapping." );
+            break;
+        case SfMStatus::NOT_ENOUGH_MOTION:
+            break;
+        case SfMStatus::LOST_TRACKING:
+            gui.setStatusMessage( "Lost tracking. Try to match against last frame." );
+            break;
+        default:
+            cerr << "Should never fall here." << endl;
+            break;
     }
-
-    // Publication()
-    gui.setLatestFrameView( frame );
 
     if ( gui.gotSignal() ) {
         systemStatus = SystemStatus::FETCHING;
     }
 
     // Evita super processamento.
-    this_thread::sleep_for( chrono::microseconds( 25000 ) );
-
-    //unsigned int fps = 60;
-    //usleep( 1000000 / fps );
-}
-
-void Core::halt()
-{
-    video.stop();
-    gui.stop();
+    this_thread::sleep_for( chrono::milliseconds( 100 ) ); //25
 }

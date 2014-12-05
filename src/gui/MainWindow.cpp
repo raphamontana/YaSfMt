@@ -39,6 +39,8 @@ MainWindow::~MainWindow()
 {
     sendSignal( SignalType::QUIT );
     qApp->quit();
+    // Intervalo para tratar os sinais emitidos antes de desalocar os objetos.
+    this_thread::sleep_for( chrono::milliseconds( 150 ) );
 }
 
 
@@ -62,7 +64,6 @@ void MainWindow::setupUi()
     setupPointCloudView();
 
     setCentralWidget( centralWidget );
-
 }
 
 
@@ -261,9 +262,7 @@ void MainWindow::setStatusMessage( string message )
 
 void MainWindow::incrementFramesCounter()
 {
-    if ( latestFrameViewLabel != NULL ) {
-        latestFrameViewLabel->setText( QString( "Latest frame: " + QString::number( ++framesCounter ) ) );
-    }
+    latestFrameViewLabel->setText( QString( "Latest frame: " + QString::number( ++framesCounter ) ) );
 }
 
 

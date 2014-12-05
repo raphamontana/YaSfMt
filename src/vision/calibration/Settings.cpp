@@ -99,13 +99,13 @@ void Settings::interprate()
 
     flag = 0;
     if ( calibFixPrincipalPoint ) {
-        flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
+        flag |= CALIB_FIX_PRINCIPAL_POINT;
     }
     if ( calibZeroTangentDist ) {
-        flag |= CV_CALIB_ZERO_TANGENT_DIST;
+        flag |= CALIB_ZERO_TANGENT_DIST;
     }
     if ( aspectRatio ) {
-        flag |= CV_CALIB_FIX_ASPECT_RATIO;
+        flag |= CALIB_FIX_ASPECT_RATIO;
     }
 
 
@@ -137,7 +137,7 @@ Mat Settings::nextImage()
     }
     else {
         if ( atImageList < (int)imageList.size() ) {
-            result = imread( imageList[atImageList++], CV_LOAD_IMAGE_COLOR );
+            result = imread( imageList[atImageList++], IMREAD_COLOR );
         }
     }
 
